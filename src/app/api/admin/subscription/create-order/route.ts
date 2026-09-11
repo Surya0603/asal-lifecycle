@@ -22,7 +22,7 @@ export async function POST() {
     const order = await razorpay.orders.create({
       amount: SUBSCRIPTION_AMOUNT_PAISE,
       currency: 'INR',
-      receipt: `asal_sub_${session.adminId}_${Date.now()}`,
+      receipt: `sub_${Date.now()}`,
       notes: { adminId: session.adminId, purpose: 'ASAL monthly subscription' }
     });
 
