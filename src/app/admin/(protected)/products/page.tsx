@@ -31,6 +31,20 @@ export default function ProductsPage() {
     return () => clearTimeout(t);
   }, [q, load]);
 
+  async function handleDelete(id: string, name: string) {
+    const confirmed = window.confirm(
+      `Delete "${name}"? This will also delete its lifecycle stages, media, and QR codes. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      alert('Failed to delete product.');
+      return;
+    }
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -91,9 +105,17 @@ export default function ProductsPage() {
                   <td className="px-4 py-3 text-slate-600">{p.status}</td>
                   <td className="px-4 py-3 text-slate-600">{p._count.qrCodes}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/admin/products/${p.id}/lifecycle`} className="text-asal font-medium hover:underline">
-                      Open Lifecycle →
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link href={`/admin/products/${p.id}/lifecycle`} className="text-asal font-medium hover:underline">
+                        Open Lifecycle →
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(p.id, p.name)}
+                        className="text-red-600 font-medium hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
