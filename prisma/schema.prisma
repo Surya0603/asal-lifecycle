@@ -1,0 +1,131 @@
+// Prisma schema for the ASAL Product Lifecycle + QR system.
+// Uses SQLite by default (zero-config, file-based). Swap the datasource
+// to postgresql/mysql and update DATABASE_URL if you outgrow SQLite —
+// nothing else in the app needs to change.
+//
+// NOTE: SQLite has no native enum type, so StageKey/MediaType/QRStatus are
+// modeled as plain String columns instead of Prisma `enum`s. The set of
+// valid values is enforced in application code (see src/lib/stages.ts and
+// the API route handlers) rather than at the database level.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  qrCodes      QRCode[]
+  subscription Subscription?
+}
+
+model Subscription {
+  id                  String    @id @default(uuid())
+  adminId             String    @unique
+  status              String    @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE
+  currentPeriodEnd    DateTime?
+  razorpayCustomerId  String?
+  lastPaymentId       String?
+  lastOrderId         String?
+  amountPaise         Int       @default(39900)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  admin   Admin              @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  history SubscriptionPayment[]
+}
+
+model SubscriptionPayment {
+  id             String   @id @default(uuid())
+  subscriptionId String
+  razorpayOrderId   String
+  razorpayPaymentId String
+  amountPaise    Int
+  status         String   @default("PAID")
+  createdAt      DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  category    String?
+  status      String   @default("In Progress")
+  sku         String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stages  LifecycleStage[]
+  qrCodes QRCode[]
+
+  @@index([name])
+}
+
+model LifecycleStage {
+  id          String   @id @default(uuid())
+  productId   String
+  stage       String
+  order       Int
+  date        DateTime?
+  time        String?
+  location    String?
+  description String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  media   Media[]
+
+  @@unique([productId, stage])
+  @@index([productId])
+}
+
+model Media {
+  id        String    @id @default(uuid())
+  stageId   String
+  type      String
+  url       String
+  thumbnail String?
+  fileName  String?
+  fileSize  Int?
+  createdAt DateTime  @default(now())
+
+  stage LifecycleStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@index([stageId])
+}
+
+model QRCode {
+  id               String   @id @default(uuid())
+  productId        String
+  publicUrl        String
+  qrImagePath      String
+  customTitle      String   @default("Complete Product Life Cycle")
+  instructionText  String   @default("Scan the QR code to check the complete product life cycle")
+  footerText       String?
+  logoPath         String?
+  fgColor          String   @default("#0f172a")
+  bgColor          String   @default("#ffffff")
+  size             Int      @default(512)
+  margin           Int      @default(2)
+  status           String   @default("ACTIVE")
+  createdAt        DateTime @default(now())
+  createdById      String?
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdBy Admin?  @relation(fields: [createdById], references: [id])
+
+  @@index([productId])
+}

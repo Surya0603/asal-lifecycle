@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ASAL Enterprise brand tokens — extracted from the official logo */
+  --asal-primary: #00A651;       /* logo green — primary actions, active states */
+  --asal-primary-hover: #00873F;
+  --asal-primary-light: #E6F7EE;
+  --asal-secondary: #2E2E33;     /* logo charcoal — the "A" mark */
+  --asal-accent: #2E2E33;
+
+  --asal-bg: #f6f5f2;
+  --asal-surface: #ffffff;
+  --asal-border: #e2e2df;
+
+  --asal-text: #1f2421;
+  --asal-text-secondary: #64748b;
+
+  --asal-success: #16a34a;
+  --asal-warning: #f59e0b;
+  --asal-danger: #dc2626;
+}
+
+html,
+body {
+  background: #f6f5f2;
+}
+
+/* A4 print sheet: 210mm x 297mm, used by the QR print page */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-a4 {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    box-shadow: none !important;
+  }
+}
+
+.print-a4 {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+}

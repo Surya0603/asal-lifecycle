@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+build/
+dev.db
+dev.db-journal
+.env
+*.log
+.DS_Store
+
+# keep upload directories but ignore actual uploaded files
+public/uploads/media/*
+public/uploads/qr/*
+!public/uploads/media/.gitkeep
+!public/uploads/qr/.gitkeep
