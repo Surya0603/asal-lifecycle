@@ -1,9 +1,6 @@
 import QRCode from 'qrcode';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { v4 as uuid } from 'uuid';
-
-const QR_DIR = path.join(process.cwd(), 'public', 'uploads', 'qr');
 
 export type QRGenOptions = {
   url: string;
@@ -14,24 +11,28 @@ export type QRGenOptions = {
 };
 
 /**
- * Generates a QR PNG on disk and returns the public path (under /uploads/qr/...).
- * Kept deliberately free of decorative styling — the decorative A4 sheet is
- * composed separately client-side so it can never reduce QR scannability.
+ * Generates a QR PNG in memory and uploads it to Vercel Blob storage,
+ * returning the public Blob URL. Kept deliberately free of decorative
+ * styling — the decorative A4 sheet is composed separately client-side
+ * so it can never reduce QR scannability.
  */
 export async function generateQrPng(opts: QRGenOptions): Promise<string> {
-  await fs.mkdir(QR_DIR, { recursive: true });
-  const fileName = `qr-${uuid()}.png`;
-  const filePath = path.join(QR_DIR, fileName);
-
-  await QRCode.toFile(filePath, opts.url, {
+  const buffer = await QRCode.toBuffer(opts.url, {
     width: opts.size,
     margin: opts.margin,
     color: {
       dark: opts.fgColor,
       light: opts.bgColor
     },
-    errorCorrectionLevel: 'H' // highest error correction — keeps it scannable even with a center logo overlay
+    errorCorrectionLevel: 'H'
   });
 
-  return `/uploads/qr/${fileName}`;
+  const fileName = `qr/qr-${uuid()}.png`;
+
+  const blob = await put(fileName, buffer, {
+    access: 'public',
+    contentType: 'image/png'
+  });
+
+  return blob.url;
 }
