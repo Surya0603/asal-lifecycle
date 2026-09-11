@@ -1,8 +1,5 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { v4 as uuid } from 'uuid';
-
-const MEDIA_DIR = path.join(process.cwd(), 'public', 'uploads', 'media');
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 const VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
@@ -37,18 +34,16 @@ export async function saveMediaFile(file: File): Promise<{
   const type = classifyMedia(file.type);
   validateSize(type, file.size);
 
-  await fs.mkdir(MEDIA_DIR, { recursive: true });
+  const ext = file.name.includes('.') ? file.name.split('.').pop() : (type === 'IMAGE' ? 'jpg' : 'mp4');
+  const blobName = `media/${type.toLowerCase()}-${uuid()}.${ext}`;
 
-  const ext = path.extname(file.name) || (type === 'IMAGE' ? '.jpg' : '.mp4');
-  const fileName = `${type.toLowerCase()}-${uuid()}${ext}`;
-  const filePath = path.join(MEDIA_DIR, fileName);
-
-  const arrayBuffer = await file.arrayBuffer();
-  await fs.writeFile(filePath, Buffer.from(arrayBuffer));
+  const blob = await put(blobName, file, {
+    access: 'public',
+  });
 
   return {
     type,
-    url: `/uploads/media/${fileName}`,
+    url: blob.url,
     fileName: file.name,
     fileSize: file.size
   };
