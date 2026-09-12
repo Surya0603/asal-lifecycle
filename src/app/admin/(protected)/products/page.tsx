@@ -12,6 +12,8 @@ type Product = {
   _count: { qrCodes: number };
 };
 
+const STATUS_OPTIONS = ['In Progress', 'Completed', 'On Hold'];
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [q, setQ] = useState('');
@@ -43,6 +45,22 @@ export default function ProductsPage() {
       return;
     }
     setProducts((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  async function handleStatusChange(id: string, newStatus: string) {
+    const prevProducts = products;
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p)));
+
+    const res = await fetch(`/api/admin/products/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (!res.ok) {
+      alert('Failed to update status.');
+      setProducts(prevProducts);
+    }
   }
 
   return (
@@ -102,7 +120,20 @@ export default function ProductsPage() {
                     <div className="text-xs text-slate-400">{p.sku ? `SKU: ${p.sku}` : p.id.slice(0, 8)}</div>
                   </td>
                   <td className="px-4 py-3 text-slate-600">{p.category || '—'}</td>
-                  <td className="px-4 py-3 text-slate-600">{p.status}</td>
+                  <td className="px-4 py-3">
+                    <select
+                      value={p.status}
+                      onChange={(e) => handleStatusChange(p.id, e.target.value)}
+                      className="rounded-md border border-slate-300 px-2 py-1 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-asal"
+                    >
+                      {!STATUS_OPTIONS.includes(p.status) && (
+                        <option value={p.status}>{p.status}</option>
+                      )}
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </td>
                   <td className="px-4 py-3 text-slate-600">{p._count.qrCodes}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
