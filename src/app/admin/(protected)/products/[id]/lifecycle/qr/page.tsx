@@ -149,7 +149,6 @@ export default function QRCustomizePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[360px_1fr]">
-        {/* Controls */}
         <div className="no-print space-y-4 rounded-xl border border-slate-200 bg-white p-5">
           <Field label="Title">
             <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
@@ -202,12 +201,11 @@ export default function QRCustomizePage() {
           )}
         </div>
 
-        {/* Preview */}
         <div ref={sheetRef} className="flex justify-center bg-slate-100 p-6 print:bg-white print:p-0">
           {sheetData ? (
             <QRSheet data={sheetData} />
           ) : (
-            <div className="print-a4 flex items-center justify-center border border-dashed border-slate-300 bg-white text-sm text-slate-400">
+            <div className="flex min-h-[500px] items-center justify-center border border-dashed border-slate-300 bg-white text-sm text-slate-400">
               Generate a QR to see the A4 print preview
             </div>
           )}
