@@ -112,7 +112,7 @@ export default function QRCustomizePage() {
     y += 20;
 
     pdf.setFont('helvetica', 'bold');
-    pdf.text('ASAL', pageWidth / 2, 280, { align: 'center' });
+    pdf.text('ASAL ENTERPRISES', pageWidth / 2, 280, { align: 'center' });
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9);
     const contact = process.env.NEXT_PUBLIC_ASAL_CONTACT_PHONE || '';

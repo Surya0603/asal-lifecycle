@@ -34,7 +34,7 @@ export default function QRSheet({ data }: { data: QRSheetData }) {
       </div>
 
       <div className="flex w-full flex-col items-center border-t border-slate-200 pt-5 text-center text-xs text-slate-500">
-        <p className="text-sm font-semibold tracking-wide text-asal">ASAL</p>
+        <p className="text-sm font-semibold tracking-wide text-asal">ASAL ENTERPRISES</p>
         {data.instagram && <p>{data.instagram}</p>}
         {data.contactPhone && <p>{data.contactPhone}</p>}
         {data.footerText && <p className="mt-1">{data.footerText}</p>}
